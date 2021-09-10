@@ -13,7 +13,6 @@
 
 import { default as UTILS } from './deer-utils.js'
 import { default as config } from './deer-config.js'
-import { OpenSeadragon} from './openseadragon.js'
 
 const changeLoader = new MutationObserver(renderChange)
 var DEER = config
