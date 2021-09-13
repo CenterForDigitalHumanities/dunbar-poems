@@ -42,6 +42,7 @@ async function generateDLAPoetryEntities(TEIpoemsForRERUM){
             "name" : poemObj.name
         }
         // Create the Work (poem)
+        console.log("Create poem entity '"+poemObj.name+"' and connect related data")
         await fetch(URLS.CREATE, {
             method: "POST",
             mode: "cors",
@@ -161,7 +162,8 @@ async function generateDLAPoetryEntities(TEIpoemsForRERUM){
                     //Each Expression gets a manifestationAnnotation.  Target is URL property from poems.json
             })
             .catch(err => {console.error("Could not make Expression entity")})
+            console.log("Finished creating poem entity '"+poemObj.name+"' and initializing data connections!")
         })
-        .catch(err => {console.error("Could not make entity")})   
+        .catch(err => {console.error("Could not make Poem entity '"+poemObj.name+"'")})   
     })
 }
