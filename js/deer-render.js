@@ -303,7 +303,7 @@ export default class DeerRender {
                         }],
                         "__rerum.history.next": historyWildcard
                     }
-                    fetch(DEER.URLS.QUERY, {
+                    fetch(DEER.URLS.QUERY+"?limit=10&skip=0", {
                         method: "POST",
                         mode: "cors",
                         body: JSON.stringify(queryObj)
