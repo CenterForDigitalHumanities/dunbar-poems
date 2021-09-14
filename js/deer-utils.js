@@ -32,7 +32,7 @@ export default {
                 return list
             })
     },
-    getValue: function (property, alsoPeek = [], asType) {
+    getValue: function (property, alsoPeek = [], asType="INITIAL") {
         // TODO: There must be a best way to do this...
         let prop;
         if (property === undefined || property === "") {
@@ -84,9 +84,8 @@ export default {
             } else {
                 // no casting requested
             }
-        } finally {
-            return (prop.length === 1) ? prop[0] : prop
         }
+        return (prop.length === 1) ? prop[0] : prop
     },
     /**
      * Attempt to discover a readable label from the object
@@ -164,9 +163,9 @@ export default {
                                             const annoValues = (Array.isArray(val)) ? val : [val]
                                             annoValues.forEach(a => {
                                                 // TODO: This is a brute force and not great.
-                                                for (const v of obj[k]) {
+                                                for (let v of obj[k]) {
                                                     try {
-                                                        if (isUpdatedBy(v.source.citationSource), a) {
+                                                        if (isUpdatedBy(v.source.citationSource, a)) {
                                                             v = a
                                                         }
                                                     } catch (err) {

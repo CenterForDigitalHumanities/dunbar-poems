@@ -61,9 +61,9 @@ async function renderChange(mutationsList) {
 
 const RENDER = {}
 
-RENDER.element = function (elem, obj) {
+RENDER.element = function (elem, root_obj) {
 
-    return UTILS.expand(obj).then(obj => {
+    return UTILS.expand(root_obj).then(obj => {
         let tmplName = elem.getAttribute(DEER.TEMPLATE) || (elem.getAttribute(DEER.COLLECTION) ? "list" : "json")
         let template = DEER.TEMPLATES[tmplName] || DEER.TEMPLATES.json
         let options = {
@@ -261,7 +261,6 @@ DEER.TEMPLATES.person = function (obj, options = {}) {
     } catch (err) {
         return null
     }
-    return null
 }
 
 /**
@@ -271,15 +270,13 @@ DEER.TEMPLATES.person = function (obj, options = {}) {
  */
 DEER.TEMPLATES.event = function (obj, options = {}) {
     try {
-        let tmpl = `<h1>${UTILS.getLabel(obj)}</h1>`
-        return tmpl
+        return `<h1>${UTILS.getLabel(obj)}</h1>`
     } catch (err) {
         return null
     }
-    return null
 }
 
-const limiter = pLimit(4)
+const limiter = pLimit(2)
 
 export default class DeerRender {
     constructor(elem, deer = {}) {
@@ -393,11 +390,11 @@ export default class DeerRender {
  * @param {type} config A DEER configuration from deer-config.js
  * @return {Promise} A promise confirming all views were visited and rendered.
  */
-export function initializeDeerViews(config) {
+export function initializeDeerViews(local_config) {
     return new Promise((res) => {
-        const views = document.querySelectorAll(config.VIEW)
-        Array.from(views).forEach(elem => new DeerRender(elem, config))
-        document.addEventListener(DEER.EVENTS.NEW_VIEW, e => Array.from(e.detail.set).forEach(elem => new DeerRender(elem, config)))
+        const views = document.querySelectorAll(local_config.VIEW)
+        Array.from(views).forEach(elem => new DeerRender(elem, local_config))
+        document.addEventListener(DEER.EVENTS.NEW_VIEW, e => Array.from(e.detail.set).forEach(elem => new DeerRender(elem, local_config)))
         /**
          * Really each render should be a promise and we should return a Promise.all() here of some kind.
          * That would only work if DeerRender resulted in a Promise where we could return Promise.all(renderPromises).
