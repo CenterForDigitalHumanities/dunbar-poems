@@ -42,13 +42,16 @@ function getAllWorks(){
         "type":"Work",
         "additionalType":"http://purl.org/dc/dcmitype/Text"
     }
-    return fetch(`query`,{
+    return fetch(URLS.QUERY,{
         method:'POST',
-        body: JSON.stringify(queryObj),
-        headers...
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: JSON.stringify(queryObj)
     })
     .then(res=>res.json())
-    .then(works=>works.map(w=>({'@id',"name"})))
+    .then(works=> {works.map(w=>({'@id':w?.["@id"],"name":w?.["name"]}))})
     .catch(err=>raiseHell)
 }
 
@@ -56,7 +59,7 @@ function getAllWorks(){
 /*
 return a set of close matches based on titleString from pems.json
 */
-function findMatchedEntries(title,fromTitleMap){
+function findMatchedEntries(title,f romTitleMap){
     return fromTitleMap.get(title)    
 }
 
