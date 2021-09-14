@@ -14,6 +14,8 @@
 import { default as UTILS } from './deer-utils.js'
 import { default as config } from './deer-config.js'
 
+import pLimit from './plimit.js'
+
 const changeLoader = new MutationObserver(renderChange)
 var DEER = config
 
@@ -277,6 +279,8 @@ DEER.TEMPLATES.event = function (obj, options = {}) {
     return null
 }
 
+const limiter = pLimit(4)
+
 export default class DeerRender {
     constructor(elem, deer = {}) {
         for (let key in DEER) {
@@ -301,7 +305,7 @@ export default class DeerRender {
                 throw err
             } else {
                 if (this.id) {
-                    fetch(this.id).then(response => response.json()).then(obj => RENDER.element(this.elem, obj)).catch(err => err)
+                    limiter(()=>fetch(this.id).then(response => response.json()).then(obj => RENDER.element(this.elem, obj)).catch(err => err))
                 } else if (this.collection) {
                     // Look not only for direct objects, but also collection annotations
                     // Only the most recent, do not consider history parent or children history nodes
