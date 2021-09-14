@@ -3,7 +3,7 @@
     <head>
         <title>Generate Dunbar Data Connections</title>
         <link rel="stylesheet" href="css/gloss.css">
-        <script src="works-script/generate-initial-collection.js" />
+        <script type="text/javascript" src="works-script/generate-initial-collection.js"> </script>
         <link href="favicon.ico" rel="icon" type="image/x-icon" />
         <style>
         	ul{
@@ -24,4 +24,7 @@
         <h3>Manifestations created</h3>
         <ul id="manifestation-arr"> </ul>
     </body>
+    <script>
+        document.getElementById("dopoems").addEventListener('click', () => getPoemsAsJSON())
+    </script>
 </html>
