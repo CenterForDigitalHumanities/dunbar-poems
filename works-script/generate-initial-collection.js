@@ -43,7 +43,7 @@ async function generateDLAPoetryEntities(TEIpoemsForRERUM){
         }
         // Create the Work (poem)
         console.log("Create poem entity '"+poemObj.name+"' and connect related data")
-        await fetch(URLS.CREATE, {
+        const work = await fetch(URLS.CREATE, {
             method: "POST",
             mode: "cors",
             headers: {
@@ -67,7 +67,7 @@ async function generateDLAPoetryEntities(TEIpoemsForRERUM){
             }
 
             console.log("Syncronously (a) make annotation to place poem entity into "+poemObj.targetCollection)
-            await fetch(URLS.CREATE, {
+            const collectionAnno = await fetch(URLS.CREATE, {
                 method: "POST",
                 mode: "cors",
                 headers: {
@@ -76,8 +76,9 @@ async function generateDLAPoetryEntities(TEIpoemsForRERUM){
                 body: JSON.stringify(collectionAnnotation)
             })
             .then(res => res.json())
-            .then(collectionAnno => {
+            .then(cAnno => {
                 console.log(poemObj.name + "placed into " +poemObj.targetCollection+ "collection via annotation")
+                return poemObj.name + "placed into " +poemObj.targetCollection+ "collection via annotation"
             })
             .catch(err => {console.error("Could not make collection annotation")})
 
@@ -90,7 +91,7 @@ async function generateDLAPoetryEntities(TEIpoemsForRERUM){
             }
 
             console.log("Syncronously (a) make Expression entity for poem "+poemObj.targetCollection)
-            await fetch(URLS.CREATE, {
+            const expEntity = await fetch(URLS.CREATE, {
                 method: "POST",
                 mode: "cors",
                 headers: {
@@ -100,8 +101,6 @@ async function generateDLAPoetryEntities(TEIpoemsForRERUM){
             })
             .then(res => res.json())
             .then(expressionEntity => {
-                console.log("Expression entity created for poem "+rerumPoem.name)
-
                 console.log("Syncronously (b) create the expression annotation to connect Expression and Poem entity")
                 let expressionAnnotation = {
                     "@context": "http://www.w3.org/ns/anno.jsonld",
@@ -113,7 +112,7 @@ async function generateDLAPoetryEntities(TEIpoemsForRERUM){
                     },
                     "target": expressionEntity["@id"]
                 }   
-                await fetch(URLS.CREATE, {
+                const expAnno = await fetch(URLS.CREATE, {
                     method: "POST",
                     mode: "cors",
                     headers: {
@@ -122,7 +121,10 @@ async function generateDLAPoetryEntities(TEIpoemsForRERUM){
                     body: JSON.stringify(expressionAnnotation)
                 })
                 .then(res => res.json())    
-                .then(expressionAnno => {console.log("Finished making expression annotation ")}) 
+                .then(expressionAnno => {
+                    console.log("Finished making expression annotation")
+                    return "Finished making expression annotation"
+                }) 
                 .catch(err => console.error("Failed to make expression annotation"))
 
                 //We should not be making manifest objects, unless we are creating an entire manifestation which we are not.
@@ -144,7 +146,7 @@ async function generateDLAPoetryEntities(TEIpoemsForRERUM){
                         }
                     }
                 }       
-                await fetch(URLS.CREATE, {
+                const manifestationAnno = await fetch(URLS.CREATE, {
                     method: "POST",
                     mode: "cors",
                     headers: {
@@ -153,9 +155,12 @@ async function generateDLAPoetryEntities(TEIpoemsForRERUM){
                     body: JSON.stringify(manifestationAnnotation)
                 })
                 .then(res => res.json())    
-                .then(manifestationAnno => {console.log("Finished making manifestation annotation")}) 
+                .then(mAnno => {
+                    console.log("Finished making manifestation annotation")
+                    return "Finished making manifestation annotation"
+                }) 
                 .catch(err => console.error("Failed to make manifestation annotation")) 
-
+                return "Expression entity created for poem "+rerumPoem.name
                 /* as soon as we start to relate it to {ecommons} we are creating new expressions.  There are more expressions than just the complete book TEI, like a Google Book.*/
                 //For each title match of rerumEntity.name in poems.json
                     //Each match needs a new Expression, looks like one above )title will match by accident)
@@ -163,6 +168,7 @@ async function generateDLAPoetryEntities(TEIpoemsForRERUM){
             })
             .catch(err => {console.error("Could not make Expression entity")})
             console.log("Finished creating poem entity '"+poemObj.name+"' and initializing data connections!")
+            return "Finished creating poem entity '"+poemObj.name+"' and initializing data connections!"
         })
         .catch(err => {console.error("Could not make Poem entity '"+poemObj.name+"'")})   
     })
