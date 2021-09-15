@@ -14,6 +14,8 @@
 import { default as UTILS } from './deer-utils.js'
 import { default as config } from './deer-config.js'
 
+import pLimit from './plimit.js'
+
 const changeLoader = new MutationObserver(renderChange)
 var DEER = config
 
@@ -59,9 +61,9 @@ async function renderChange(mutationsList) {
 
 const RENDER = {}
 
-RENDER.element = function (elem, obj) {
+RENDER.element = function (elem, root_obj) {
 
-    return UTILS.expand(obj).then(obj => {
+    return UTILS.expand(root_obj).then(obj => {
         let tmplName = elem.getAttribute(DEER.TEMPLATE) || (elem.getAttribute(DEER.COLLECTION) ? "list" : "json")
         let template = DEER.TEMPLATES[tmplName] || DEER.TEMPLATES.json
         let options = {
@@ -219,8 +221,21 @@ DEER.TEMPLATES.list = function (obj, options = {}) {
     if (options.list) {
         tmpl += `<ul>`
         obj[options.list].forEach((val, index) => {
-            let name = UTILS.getLabel(val, (val.type || val['@type'] || index))
+            let name = UTILS.getLabel(val, (val.type || val['@type'] || (index+1)))
             tmpl += (val["@id"] && options.link) ? `<li ${DEER.ID}="${val["@id"]}"><a href="${options.link}${val["@id"]}">${name}</a></li>` : `<li ${DEER.ID}="${val["@id"]}">${name}</li>`
+        })
+        tmpl += `</ul>`
+    }
+    return tmpl
+}
+
+DEER.TEMPLATES.poemsList = function (obj, options = {}) {
+    let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
+    if (options.list) {
+        tmpl += `<ul>`
+        obj[options.list].forEach((val, index) => {
+            let name = UTILS.getLabel(val, (val.type ?? val['@type'] ?? (index+1)))
+            tmpl += (val["@id"] && options.link) ? `<li ${DEER.ID}="${val["@id"]}"><a href="${options.link}${val["@id"]}"><deer-view ${DEER.ID}="${val["@id"]}" ${DEER.TEMPLATE}="label">${name}</deer-view></a></li>` : `<li ${DEER.ID}="${val["@id"]}"><deer-view ${DEER.ID}="${val["@id"]}" ${DEER.TEMPLATE}="label">${name}</deer-view></li>`
         })
         tmpl += `</ul>`
     }
@@ -246,7 +261,6 @@ DEER.TEMPLATES.person = function (obj, options = {}) {
     } catch (err) {
         return null
     }
-    return null
 }
 
 /**
@@ -256,13 +270,13 @@ DEER.TEMPLATES.person = function (obj, options = {}) {
  */
 DEER.TEMPLATES.event = function (obj, options = {}) {
     try {
-        let tmpl = `<h1>${UTILS.getLabel(obj)}</h1>`
-        return tmpl
+        return `<h1>${UTILS.getLabel(obj)}</h1>`
     } catch (err) {
         return null
     }
-    return null
 }
+
+const limiter = pLimit(2)
 
 export default class DeerRender {
     constructor(elem, deer = {}) {
@@ -288,7 +302,7 @@ export default class DeerRender {
                 throw err
             } else {
                 if (this.id) {
-                    fetch(this.id).then(response => response.json()).then(obj => RENDER.element(this.elem, obj)).catch(err => err)
+                    limiter(()=>fetch(this.id).then(response => response.json()).then(obj => RENDER.element(this.elem, obj)).catch(err => err))
                 } else if (this.collection) {
                     // Look not only for direct objects, but also collection annotations
                     // Only the most recent, do not consider history parent or children history nodes
@@ -303,27 +317,41 @@ export default class DeerRender {
                         }],
                         "__rerum.history.next": historyWildcard
                     }
-                    fetch(DEER.URLS.QUERY+"?limit=10&skip=0", {
+                    const listObj = {
+                        name: this.collection,
+                        itemListElement: []
+                    }
+
+                    getPagedQuery.bind(this)(100)
+                    .then(()=>RENDER.element(this.elem, listObj))
+                    .catch(err=>{
+                        console.error("Broke with listObj at ",listObj)
+                        RENDER.element(this.elem, listObj)
+                    })
+
+                    function getPagedQuery(lim,it=0) {
+                        return fetch(`${DEER.URLS.QUERY}?limit=${lim}&skip=${it}`, {
                         method: "POST",
                         mode: "cors",
                         body: JSON.stringify(queryObj)
                     }).then(response => response.json())
-                        .then(pointers => {
-                            let list = []
-                            pointers.map(tc => list.push(fetch(tc.target || tc["@id"] || tc.id).then(response => response.json().catch(err => { __deleted: console.log(err) }))))
-                            return Promise.all(list).then(l => l.filter(i => !i.hasOwnProperty("__deleted")))
-                        })
+                        // .then(pointers => {
+                        //     let list = []
+                        //     pointers.map(tc => list.push(fetch(tc.target || tc["@id"] || tc.id).then(response => response.json().catch(err => { __deleted: console.log(err) }))))
+                        //     return Promise.all(list).then(l => l.filter(i => !i.hasOwnProperty("__deleted")))
+                        // })
                         .then(list => {
-                            let listObj = {
-                                name: this.collection,
-                                itemListElement: list
-                            }
+                            listObj.itemListElement = listObj.itemListElement.concat(list.map(anno=>({'@id':anno.target ?? anno["@id"] ?? anno.id})))
                             this.elem.setAttribute(DEER.LIST, "itemListElement")
                             try {
                                 listObj["@type"] = list[0]["@type"] || list[0].type || "ItemList"
                             } catch (err) { }
-                            RENDER.element(this.elem, listObj)
+                            // RENDER.element(this.elem, listObj)
+                            if(list.length%lim === 0) {
+                                return getPagedQuery.bind(this)(lim,it+list.length)
+                            }
                         })
+                    }
                 }
             }
         } catch (err) {
@@ -362,11 +390,11 @@ export default class DeerRender {
  * @param {type} config A DEER configuration from deer-config.js
  * @return {Promise} A promise confirming all views were visited and rendered.
  */
-export function initializeDeerViews(config) {
+export function initializeDeerViews(local_config) {
     return new Promise((res) => {
-        const views = document.querySelectorAll(config.VIEW)
-        Array.from(views).forEach(elem => new DeerRender(elem, config))
-        document.addEventListener(DEER.EVENTS.NEW_VIEW, e => Array.from(e.detail.set).forEach(elem => new DeerRender(elem, config)))
+        const views = document.querySelectorAll(local_config.VIEW)
+        Array.from(views).forEach(elem => new DeerRender(elem, local_config))
+        document.addEventListener(DEER.EVENTS.NEW_VIEW, e => Array.from(e.detail.set).forEach(elem => new DeerRender(elem, local_config)))
         /**
          * Really each render should be a promise and we should return a Promise.all() here of some kind.
          * That would only work if DeerRender resulted in a Promise where we could return Promise.all(renderPromises).
