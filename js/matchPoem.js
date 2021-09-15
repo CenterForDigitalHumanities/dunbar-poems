@@ -8,14 +8,7 @@ annotate Expression-->isRealizationOf-->Work
 annotate poem.url with isEmbodimentOf Expression
 */
 
-const URLS = {
-    BASE_ID: "http://devstore.rerum.io/v1",
-    CREATE: "http://tinydev.rerum.io/app/create",
-    UPDATE: "http://tinydev.rerum.io/app/update",
-    QUERY: "http://tinydev.rerum.io/app/query",
-    OVERWRITE: "http://tinydev.rerum.io/app/overwrite",
-    SINCE: "http://devstore.rerum.io/v1/since"
-}
+import { default as config } from './deer-config.js'
 
 const running = fetch(jsonfile).then(f=>f.json())
 .then((poems)=>{
@@ -29,11 +22,11 @@ const running = fetch(jsonfile).then(f=>f.json())
     })
 
 function makePoemMap(poems){
-    const poemMapToReturn = new Map();
+    const poemMap = new Map();
     poems.forEach(p=>{
-        poemMapToReturn.set(p.title, p.url)
+        poemMap.set(p.title, (poemMap.get(p.title) ?? []).concat(p.url))
     })
-    return poemMapToReturn
+    return poemMap
 }
 
 function getAllWorks(){
@@ -42,7 +35,7 @@ function getAllWorks(){
         "type":"Work",
         "additionalType":"http://purl.org/dc/dcmitype/Text"
     }
-    return fetch(URLS.QUERY,{
+    return fetch(config.URLS.QUERY,{
         method:'POST',
         mode: 'cors',
         headers: {
@@ -59,7 +52,7 @@ function getAllWorks(){
 /*
 return a set of close matches based on titleString from pems.json
 */
-function findMatchedEntries(title,f romTitleMap){
+function findMatchedEntries(title,fromTitleMap){
     return fromTitleMap.get(title)    
 }
 
@@ -71,7 +64,7 @@ function generateNewExpressionOfWork(poem,workId){
         "title" : poem.name,
         "@context" : "FRBR"
     }
-    return await fetch(URLS.CREATE, {
+    return await fetch(config.URLS.CREATE, {
         method: "POST",
         mode: "cors",
         headers: {
