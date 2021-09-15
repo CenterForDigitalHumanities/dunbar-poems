@@ -28,7 +28,7 @@ match.addEventListener('click',poemMatch)
 
 function makePoemMap(poems) {
     const poemMap = new Map();
-    poems.forEach(p => {
+    poems.filter(item=>item.title).forEach(p => {
         poemMap.set(p.title.toLowerCase(), (poemMap.get(p.title.toLowerCase()) ?? []).concat(p.url))
     })
     return poemMap
@@ -56,11 +56,12 @@ function getAllWorks() {
         })
             .then(res => res.json())
             .then(works => {
-                allWorks.concat(works.map(w => ({ '@id': w?.["@id"], "name": w?.["name"] })))
+                allWorks=allWorks.concat(works.map(w => ({ '@id': w?.["@id"], "name": w?.["name"] })))
                 if (works.length % lim === 0) {
                     return getPagedQuery.bind(this)(lim, it + works.length)
                 }
             })
+            .then(empty=>allWorks)
             .catch(err => raiseHell)
     }
 }
@@ -76,7 +77,7 @@ function generateNewExpressionOfWork(poem, workId) {
         "type": "Expression",
         "testing": "forDLA",
         "title": poem.title,
-        "@context": "http://iflastandards.info/ns/fr/frbr/frbrer/"
+        "@context": "http://purl.org/vocab/frbr/core#"
     }
     return createObject(expression)
         .then(res => res.headers.get('Location'))
