@@ -13,7 +13,7 @@ import pLimit from './plimit.js'
 
 const limiter = pLimit(2)
 
-const running = fetch(`http://dunbar-poems.rerum.io/media/poems.json`).then(f => f.json())
+const poemMatch = fetch(`http://dunbar-poems.rerum.io/media/poems.json`).then(f => f.json())
     .then((poems) => {
         const poemMap = makePoemMap(poems.results)
         getAllWorks()
@@ -23,6 +23,8 @@ const running = fetch(`http://dunbar-poems.rerum.io/media/poems.json`).then(f =>
                 })
             })
     })
+
+match.addEventListener('click',poemMatch)
 
 function makePoemMap(poems) {
     const poemMap = new Map();
