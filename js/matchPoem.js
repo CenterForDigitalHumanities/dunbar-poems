@@ -29,7 +29,7 @@ match.addEventListener('click',poemMatch)
 function makePoemMap(poems) {
     const poemMap = new Map();
     poems.forEach(p => {
-        poemMap.set(p.title.toLowercase(), (poemMap.get(p.title.toLowercase()) ?? []).concat(p.url))
+        poemMap.set(p.title.toLowerCase(), (poemMap.get(p.title.toLowerCase()) ?? []).concat(p.url))
     })
     return poemMap
 }
@@ -67,7 +67,7 @@ function getAllWorks() {
 
 // return a set of close matches based on titleString from poems.json
 function findMatchedEntries(title, fromTitleMap) {
-    return fromTitleMap.get(title.toLowercase()).map(url => ({ title, url }))
+    return fromTitleMap.get(title.toLowerCase()).map(url => ({ title, url }))
 }
 
 // return Promise to generate Expression
