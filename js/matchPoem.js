@@ -9,6 +9,9 @@ annotate poem.url with isEmbodimentOf Expression
 */
 
 import { default as config } from './deer-config.js'
+import pLimit from './plimit.js'
+
+const limiter = pLimit(2)
 
 const running = fetch(`http://dunbar-poems.rerum.io/media/poems.json`).then(f => f.json())
     .then((poems) => {
@@ -24,35 +27,45 @@ const running = fetch(`http://dunbar-poems.rerum.io/media/poems.json`).then(f =>
 function makePoemMap(poems) {
     const poemMap = new Map();
     poems.forEach(p => {
-        poemMap.set(p.title, (poemMap.get(p.title) ?? []).concat(p.url))
+        poemMap.set(p.title.toLowercase(), (poemMap.get(p.title.toLowercase()) ?? []).concat(p.url))
     })
     return poemMap
 }
 
 function getAllWorks() {
 
+    let allWorks = []
+
     const queryObj = {
         "type": "Work",
         "additionalType": "http://purl.org/dc/dcmitype/Text"
     }
-    return fetch(config.URLS.QUERY, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json;charset=utf-8'
-        },
-        body: JSON.stringify(queryObj)
-    })
-        .then(res => res.json())
-        .then(works => works.map(w => ({ '@id': w?.["@id"], "name": w?.["name"] })))
-        .catch(err => raiseHell)
+
+    return getPagedQuery.bind(this)(50)
+
+    function getPagedQuery(lim, it = 0) {
+        return fetch(`${config.URLS.QUERY}?limit=${lim}&skip=${it}`, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(queryObj)
+        })
+            .then(res => res.json())
+            .then(works => {
+                allWorks.concat(works.map(w => ({ '@id': w?.["@id"], "name": w?.["name"] })))
+                if (works.length % lim === 0) {
+                    return getPagedQuery.bind(this)(lim, it + works.length)
+                }
+            })
+            .catch(err => raiseHell)
+    }
 }
 
-
-
-// return a set of close matches based on titleString from pems.json
+// return a set of close matches based on titleString from poems.json
 function findMatchedEntries(title, fromTitleMap) {
-    return fromTitleMap.get(title).map(url => ({ title, url }))
+    return fromTitleMap.get(title.toLowercase()).map(url => ({ title, url }))
 }
 
 // return Promise to generate Expression
@@ -103,12 +116,14 @@ function embodyManifestationOfExpression(manId, expId) {
 }
 
 function createObject(body) {
-    return fetch(config.URLS.CREATE, {
-        method: "POST",
-        mode: "cors",
-        headers: {
-            'Content-Type': 'application/json;charset=utf-8'
-        },
-        body: JSON.stringify(body)
+    return limiter(() => {
+        fetch(config.URLS.CREATE, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify(body)
+        })
     })
 }
