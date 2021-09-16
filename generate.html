@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>Generate Dunbar Data Connections</title>
-        <script type="text/javascript" src="works-script/generate-initial-collection.js"> </script>
-        <script type="module" src="js/matchPoem.js"> </script>
-    </head>
-    <body>
-        <button id=match>Match some things (really writes)</button>
-        <input id="dopoems" type="button" value="Get a JSON Array of all Poems"/>
-        <h3>Poems created</h3>
-        <ul id="poem-arr"> </ul>
-        <h3>Expressions created</h3>
-        <ul id="expression-arr"> </ul>
-        <h3>Manifestations created</h3>
-        <ul id="manifestation-arr"> </ul>
-    </body>
-    <script>
-        document.getElementById("dopoems").addEventListener('click', () => getPoemsAsJSON())
-    </script>
+
+<head>
+    <title>Generate Dunbar Data Connections</title>
+    <script type="text/javascript" src="works-script/generate-initial-collection.js"> </script>
+    <script type="module" src="js/matchPoem.js"> </script>
+</head>
+
+<body>
+    <button id="match">Match some things (really writes)</button>
+    <input id="dopoems" type="button" value="Get a JSON Array of all Poems" />
+    <h3>Poems created</h3>
+    <ul id="poem-arr"> </ul>
+    <h3>Expressions created</h3>
+    <ul id="expression-arr"> </ul>
+    <h3>Manifestations created</h3>
+    <ul id="manifestation-arr"> </ul>
+</body>
+<script>
+    document.getElementById("dopoems").addEventListener('click', () => getPoemsAsJSON())
+</script>
+
 </html>

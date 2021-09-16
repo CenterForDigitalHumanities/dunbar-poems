@@ -19,7 +19,7 @@ const poemMatch = fetch(`http://dunbar-poems.rerum.io/media/poems.json`).then(f 
         getAllWorks()
             .then(works => {
                 works.forEach(w => {
-                    findMatchedEntries(w.name, poemMap).forEach(poem => generateNewExpressionOfWork(poem, w['@id']))
+                    findMatchedEntries(w.name, poemMap)?.forEach(poem => generateNewExpressionOfWork(poem, w['@id']))
                 })
             })
     })
@@ -68,7 +68,7 @@ function getAllWorks() {
 
 // return a set of close matches based on titleString from poems.json
 function findMatchedEntries(title, fromTitleMap) {
-    return fromTitleMap.get(title.toLowerCase()).map(url => ({ title, url }))
+    return fromTitleMap.get(title.toLowerCase())?.map(url => ({ title, url }))
 }
 
 // return Promise to generate Expression
@@ -80,7 +80,6 @@ function generateNewExpressionOfWork(poem, workId) {
         "@context": "http://purl.org/vocab/frbr/core#"
     }
     return createObject(expression)
-        .then(res => res.headers.get('Location'))
         .then(eId => {
             realizeExpressionOfWork(eId, workId)
             embodyManifestationOfExpression(poem.url, eId)
@@ -120,7 +119,7 @@ function embodyManifestationOfExpression(manId, expId) {
 
 function createObject(body) {
     return limiter(() => {
-        fetch(config.URLS.CREATE, {
+        return fetch(config.URLS.CREATE, {
             method: "POST",
             mode: "cors",
             headers: {
@@ -128,5 +127,7 @@ function createObject(body) {
             },
             body: JSON.stringify(body)
         })
+        .then(res=>res.json())
+        .then(obj => obj.new_obj_state['@id']) // headers.get("Location") was null for some reason
     })
 }
