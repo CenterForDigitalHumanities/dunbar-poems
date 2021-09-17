@@ -102,6 +102,57 @@ const config = {
             }
             return { html, then }
         },
+        expressionDetail: (obj, options = {}) => {
+            const html = `<header><h4>${UTILS.getLabel(obj)}</h4></header>
+            <p>Originally published: ${UTILS.getValue(obj.publicationDate) ?? "[ unknown ]"}</p>
+            <a href="poem.html#${UTILS.getValue(obj.isRealizationOf)}">All versions of this poem</a>
+            <div>${obj.text ?? "[ no text attached ]"}</div>
+            <div>${obj.recording ?? "[ recording unavailable ]"}</div>
+            <p>View resource: <span class="manifestation-url"></span></p>
+            `
+            const then = async (elem, obj, options) => {
+                const expId = obj['@id']
+                const historyWildcard = { "$exists": true, "$size": 0 }
+                const manQuery = {
+                    $or: [{
+                        "body.isEmbodimentOf": expId
+                    }, {
+                        "body.isEmbodimentOf.value": expId
+                    }],
+                    "__rerum.history.next": historyWildcard
+                }
+                const manifestationIds = await fetch(config.URLS.QUERY, {
+                    method: "POST",
+                    mode: "cors",
+                    body: JSON.stringify(manQuery)
+                })
+                    .then(response => response.json())
+                    .then(annos => annos.map(anno => UTILS.getValue(anno.target)))
+                    .then(async targets => {
+                        // hacky punch in some text for now
+                        for (const t of targets) {
+                            if (typeof t === "object") {
+                                try {
+                                    const sampleSource = await SaxonJS.getResource({
+                                        location: t.source,
+                                        type:'xml'
+                                    })
+                                    const poemText = SaxonJS.XPath.evaluate("/" + t.selector?.value, sampleSource, { xpathDefaultNamespace : 'http://www.tei-c.org/ns/1.0' })
+                                    textSample.innerHTML = poemText.innerHTML
+                                    break
+                                } catch (err) {
+                                    textSample.innerHTML = `Select a version below to view the poem text.`
+                                }
+                            }
+                        }
+                        return targets
+                    })
+                    .then(ids => ids.map(id => id.selector ? `${id?.source}#${id.selector.value}` : id))
+                const mURL = manId => `<a href="${manId}" target="_blank">${manId}</a>`
+                elem.querySelector(".manifestation-url").innerHTML = manifestationIds.map(manId => mURL(manId)).join('')
+            }
+            return { html, then }
+        },
         expression: (obj, options = {}) => {
             const html = `<header><h4>${UTILS.getLabel(obj)}</h4></header>
             <p>Originally published: ${UTILS.getValue(obj.publicationDate) ?? "unknown"}</p>
