@@ -15,54 +15,26 @@
             <a href="./poems.html">📚 View Poems</a>
         </div>
     </dla-header>
+
+    <deer-view deer-template="editablePoemConnections"> </deer-view>
     <form id="poem" deer-type="Work" deer-context="http://purl.org/vocab/frbr/core#">
         <input type="hidden" deer-key="targetCollection" deer-context="http://schema.org" value="DLA Poems Collection">
         <input type="hidden" deer-key="additionalType" deer-context="http://schema.org" value="http://purl.org/dc/dcmitype/Text">
+        <!-- Maybe we can generate a person entity for him and this could be a URI to an Agent -->
+        <input type="hidden" deer-key-TODO="author" value="Paul Laurence Dunbar"/>
         <div class="row">
-            <label class="col-3 col-2-md text-right">Label:</label>
+            <label class="col-3 col-2-md text-right">Name of Poem:</label>
             <input type="text" deer-key="name" placeholder="Convenient Label for Humans" deer-context="http://schema.org" class="col-9 col-10-md">
-
-            <label class="col-3 col-2-md text-right">Title:</label>
-            <input type="text" deer-key="title" placeholder="Published Title" deer-context="http://purl.org/dc/dcmitype/" class="col-9 col-10-md">
-
-            <label class="col-3 col-2-md text-right">URL:</label>
-            <!-- If this is the ecommons URL, then it is not annotated against the poem. -->
-            <!-- This URL is the target of the Annotation with body.isEmbodimentOf:poemURI -->
-            <input type="text" deer-key-TODO="url" placeholder="Record View" deer-context="http://schema.org" class="col-9 col-4-md">
 
             <label class="col-3 col-2-md text-right">Notes:</label>
             <input type="text" deer-key="notes" placeholder="notes" class="col-9 col-4-md">
 
-            <!-- Maybe we can generate a person entity for him and this could be a URI to an Agent -->
-            <input type="hidden" deer-key-TODO="author" value="Paul Laurence Dunbar"/>
-
-            <!-- Extra ecommons data that we will probably ignore for now -->
-            <input type="hidden" deer-key-TODO="context_key"/>
-            <input type="hidden" deer-key-TODO="fulltext_url"/>
-            <input type="hidden" deer-key-TODO="mtime"/>
-            <input type="hidden" deer-key-TODO="author_display"/>
-            <input type="hidden" deer-key-TODO="document_type" deer-input-type="Set" value="collected_poetry,Selected Poem,Selected Poems" />
-
-
-            <label class="col-3 col-2-md text-right">Ecommons Comments:</label>
-            <input type="text" deer-key-TODO="comment" placeholder="Ecommons Comment" class="col-9 col-4-md">
-
-            <label class="col-3 col-2-md text-right">Publication Date:</label>
-            <input type="text" deer-key-TODO="datePublished" placeholder="Ecommons Publication Date" class="col-9 col-4-md">
-            <!-- 
-            I doubt we plan to have these, just bringing them over from an LR experience as food for thought
-            -->
-            <input id="expressions" type="hidden" deer-key-TODO="relatedExpressions" deer-input-type="Set" />
-            <input id="manifestations" type="hidden" deer-key-TODO="relatedManifestations" deer-input-type="Set" />
-            <input id="items" type="hidden" deer-key-TODO="relatedItems" deer-input-type="Set" />
+            <!-- This should show expression cards with links out to add/edit expressions -->
+            <div id="poemConnections"> </div>
         </div>
         <input type="submit" value="update" class="col">
         <a href="./poems.html" onclick="deleteThis(event)" class="text-error">Drop from collection</a>
     </form>
-
-    <p class="col">Original catalog record: <deer-view id="catalogLink" deer-template="linky" deer-key="url"></deer-view></p>
-    
-    <deer-view id="poemText">incoming text from selector template</deer-view>
     
     <dla-footer class="row">
         <a href="./index.html">🏠</a>
@@ -84,12 +56,15 @@
     <script>
         window.onhashchange = onload = () => {
             const poemid = window.location.hash.substr(1)
-                ;[catalogLink, poem].forEach(el => el.setAttribute("deer-id", poemid))
+            document.getElementById("poem").setAttribute("deer-id", poemid)
+            document.getElementById("poemConnections").setAttribute("deer-id", poemid)
         }
 
-        baseProject.addEventListener('input', e => document.querySelector("a[deer-key='tpen:project']").setAttribute("href", "http://t-pen.org/TPEN/project.jsp?projectID=" + e.target.value))
-
-        function deleteThis(event) {
+        function removeExpressionFromWork(expressionID, idOfAnnotationConnectingExpressionAndWork){
+            //Do we need to delete the expression and the annotation, or just the annotation?
+            console.log("Not doing an expression deletion right now.  Maybe later.")
+            console.log("Not doing an annotation deletion right now.  Maybe later.")
+            /*
             event.preventDefault()
             if (confirm("Really remove this manuscript?\n(Cannot be undone)")) {
                 let collectorId = document.querySelector('[deer-key="targetCollection"]').getAttribute("deer-source")
@@ -100,7 +75,48 @@
                     location.href = "./poems.html"
                 })
             }
+            */
         }
+
+        addEventListener('deer-form-rendered', event => {
+            let whatRecordForm = event.target.id
+            let poemData = event.detail
+            switch(whatRecordForm){
+                case "poem":
+                    gatherConnectedData(poemData)  
+                default:
+            }
+        })
+
+        async function gatherConnectedData(expandedWorkObject){
+            const workId = expandedWorkObject['@id']
+            const historyWildcard = { "$exists": true, "$size": 0 }
+            
+            const exprQuery = {
+                $or: [{
+                    "body.isRealizationOf": workId
+                }, {
+                    "body.isRealizationOf.value": workId
+                }],
+                "__rerum.history.next": historyWildcard
+            }
+
+            const expressionConnections = await fetch("http://tinydev.rerum.io/app/query", {
+                method: "POST",
+                mode: "cors",
+                body: JSON.stringify(exprQuery)
+            })
+            .then(response => response.json())
+            .then(annos => {
+                return annos.map(anno => {
+                    return {"annoId":anno?.["@id"], "expId":anno?.target}
+                })
+            })
+            const expressionCard = con => `<deer-view class="card col" deer-template="expression" deer-link="poem-expression.html#" deer-id="${con.expId}" anno-id="${con.annoId}">${con.expId}</deer-view>`
+            poemConnections.innerHTML = expressionConnections.map(connection => expressionCard(connection)).join('')
+        }
+        
+
     </script>
 </body>
 
