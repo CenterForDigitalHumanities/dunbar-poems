@@ -70,11 +70,11 @@ const config = {
             return tmpl
         },
         poemDetail: (obj, options = {}) => {
-            const html = `<h2>${UTILS.getLabel(obj)}</h2> ${Object.keys(obj).join(", ")}
+            const html = `<h2>${UTILS.getLabel(obj)}</h2> 
             <h5>Sample Text</h5>
             <div id="textSample">[ Text Sample ]</div>
-            <h4>Expressions</h4>
-            <p>These are versions of this poem in places around the globe.</p>`
+            <h4>Around the Globe</h4>
+            <p>These are various published versions of this poem.</p>`
             const then = async (elem, obj, options) => {
                 const workId = obj['@id']
                 const historyWildcard = { "$exists": true, "$size": 0 }
@@ -104,7 +104,6 @@ const config = {
         },
         expression: (obj, options = {}) => {
             const html = `<header><h4>${UTILS.getLabel(obj)}</h4></header>
-            <dumbthing id="dumb"></dumbthing>
             <p>Originally published: ${UTILS.getValue(obj.publicationDate) ?? "unknown"}</p>
             <div class="manifestation-url"></div>
             <small>${options.link ? "<a href='" + options.link + obj['@id'] + "'" + "</a>(view details)" : ""}</small>`
@@ -131,17 +130,12 @@ const config = {
                         for (const t of targets) {
                             if (typeof t === "object") {
                                 try {
-                                    const sampleSource = await fetch(t.source)
-                                        .then(res => res.text())
-                                        .then(docStr => (new DOMParser()).parseFromString(docStr, "application/xml"))
-                                    const poemText = sampleSource.evaluate("/" + t.selector?.value, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null)
-                                    let sample = ``
-                                    let nextNode = poemText.iterateNext()
-                                    while (nextNode) {
-                                        sample += nextNode.outerHTML
-                                        nextNode = poemText.iterateNext()
-                                    }
-                                    textSample.innerHTML = sample
+                                    const sampleSource = await SaxonJS.getResource({
+                                        location: t.source,
+                                        type:'xml'
+                                    })
+                                    const poemText = SaxonJS.XPath.evaluate("/" + t.selector?.value, sampleSource, { xpathDefaultNamespace : 'http://www.tei-c.org/ns/1.0' })
+                                    textSample.innerHTML = poemText.innerHTML
                                     break
                                 } catch (err) {
                                     textSample.innerHTML = `Select a version below to view the poem text.`
