@@ -262,7 +262,7 @@ DEER.TEMPLATES.event = function (obj, options = {}) {
     }
 }
 
-const limiter = pLimit(2)
+const limiter = pLimit(4)
 
 export default class DeerRender {
     constructor(elem, deer = {}) {
