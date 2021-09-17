@@ -16,7 +16,6 @@
         </div>
     </dla-header>
 
-    <deer-view deer-template="editablePoemConnections"> </deer-view>
     <form id="poem" deer-type="Work" deer-context="http://purl.org/vocab/frbr/core#">
         <input type="hidden" deer-key="targetCollection" deer-context="http://schema.org" value="DLA Poems Collection">
         <input type="hidden" deer-key="additionalType" deer-context="http://schema.org" value="http://purl.org/dc/dcmitype/Text">
@@ -30,7 +29,7 @@
             <input type="text" deer-key="notes" placeholder="notes" class="col-9 col-4-md">
 
             <!-- This should show expression cards with links out to add/edit expressions -->
-            <div id="poemConnections"> </div>
+            <deer-view id="poemConnections" deer-template="poemExpressionConnections"> </deer-view>
         </div>
         <input type="submit" value="update" class="col">
         <a href="./poems.html" onclick="deleteThis(event)" class="text-error">Drop from collection</a>
@@ -83,7 +82,7 @@
             let poemData = event.detail
             switch(whatRecordForm){
                 case "poem":
-                    gatherConnectedData(poemData)  
+                    //gatherConnectedData(poemData)  
                 default:
             }
         })
@@ -114,6 +113,7 @@
             })
             const expressionCard = con => `<deer-view class="card col" deer-template="expression" deer-link="poem-expression.html#" deer-id="${con.expId}" anno-id="${con.annoId}">${con.expId}</deer-view>`
             poemConnections.innerHTML = expressionConnections.map(connection => expressionCard(connection)).join('')
+            //Now we would have to broadcast the new view to resolve these ids.  How??
         }
         
 

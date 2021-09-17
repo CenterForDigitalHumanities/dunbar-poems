@@ -1,4 +1,6 @@
-export default {
+import { default as UTILS } from './deer-utils.js'
+
+const config = {
     ID: "deer-id", // attribute, URI for resource to render
     TYPE: "deer-type", // attribute, JSON-LD @type
     TEMPLATE: "deer-template", // attribute, enum for custom template
@@ -66,7 +68,88 @@ export default {
                 tmpl += `</ul>`
             }
             return tmpl
+        },
+        poemExpressionConnections: (obj, options = {}) => {
+            const html = `
+            <p>These are various published versions of this poem.</p>`
+
+            const then = async (elem, obj, options) => {
+                const workId = obj['@id']
+                const historyWildcard = { "$exists": true, "$size": 0 }
+                const exprQuery = {
+                    $or: [{
+                        "body.isRealizationOf": workId
+                    }, {
+                        "body.isRealizationOf.value": workId
+                    }],
+                    "__rerum.history.next": historyWildcard
+                }
+                const expressionIds = await fetch(config.URLS.QUERY, {
+                    method: "POST",
+                    mode: "cors",
+                    body: JSON.stringify(exprQuery)
+                })
+                    .then(response => response.json())
+                    .then(annos => annos.map(anno => UTILS.getValue(anno.target)))
+                const expressionCard = expId => `<deer-view class="card col" deer-template="expression" deer-link="poem-expression.html#" deer-id="${expId}">${expId}</deer-view>`
+                const cards = document.createElement('div')
+                cards.classList.add("row")
+                cards.innerHTML = expressionIds.map(expId => expressionCard(expId)).join('')
+                elem.append(cards)
+                UTILS.broadcast(undefined, config.EVENTS.NEW_VIEW, elem, { set: cards.children })
+            }
+            return { html, then }
+        },
+        expression: (obj, options = {}) => {
+            const html = `<header><h4>${UTILS.getLabel(obj)}</h4></header>
+            <p>Originally published: ${UTILS.getValue(obj.publicationDate) ?? "unknown"}</p>
+            <div class="manifestation-url"></div>
+            <small>${options.link ? "<a href='" + options.link + obj['@id'] + "'" + "</a>(view details)" : ""}</small>`
+            const then = async (elem, obj, options) => {
+                const expId = obj['@id']
+                const historyWildcard = { "$exists": true, "$size": 0 }
+                const manQuery = {
+                    $or: [{
+                        "body.isEmbodimentOf": expId
+                    }, {
+                        "body.isEmbodimentOf.value": expId
+                    }],
+                    "__rerum.history.next": historyWildcard
+                }
+                const manifestationIds = await fetch(config.URLS.QUERY, {
+                    method: "POST",
+                    mode: "cors",
+                    body: JSON.stringify(manQuery)
+                })
+                    .then(response => response.json())
+                    .then(annos => annos.map(anno => UTILS.getValue(anno.target)))
+                    .then(async targets => {
+                        // hacky punch in some text for now
+                        for (const t of targets) {
+                            if (typeof t === "object") {
+                                try {
+                                    const sampleSource = await SaxonJS.getResource({
+                                        location: t.source,
+                                        type:'xml'
+                                    })
+                                    const poemText = SaxonJS.XPath.evaluate("/" + t.selector?.value, sampleSource, { xpathDefaultNamespace : 'http://www.tei-c.org/ns/1.0' })
+                                    textSample.innerHTML = poemText.innerHTML
+                                    break
+                                } catch (err) {
+                                    textSample.innerHTML = `Select a version below to view the poem text.`
+                                }
+                            }
+                        }
+                        return targets
+                    })
+                    .then(ids => ids.map(id => id.selector ? `${id?.source}#${id.selector.value}` : id))
+                const mURL = manId => `<a href="${manId}" target="_blank">${manId}</a>`
+                elem.querySelector(".manifestation-url").innerHTML = manifestationIds.map(manId => mURL(manId)).join('')
+            }
+            return { html, then }
         }
     },
     version: "alpha"
 }
+
+export default config
