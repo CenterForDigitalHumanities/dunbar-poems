@@ -3,16 +3,16 @@
 
 <head>
     <title>Dunbar Poems</title>
-    <link rel="stylesheet" href="/css/gloss.css">
-    <link href="/favicon.ico" rel="icon" type="image/x-icon" />
+    <link rel="stylesheet" href="../css/gloss.css">
+    <link href="../favicon.ico" rel="icon" type="image/x-icon" />
 </head>
 
 <body class="container">
     <dla-header>
-        <img src="/media/logo.jpg" alt="logo">
+        <img src="../media/logo.jpg" alt="logo">
         <div class="tabs">
-            <a href="/index.html">🏠</a>
-            <a href="/poems.html">📚 View Poems</a>
+            <a href="../index.html">🏠</a>
+            <a href="../poems.html">📚 View Poems</a>
         </div>
     </dla-header>
     <deer-view id="poem" deer-template="poemDetail">
@@ -22,8 +22,8 @@
     <deer-view id="poemText">incoming text from selector template</deer-view>
     
     <dla-footer class="row">
-        <a href="/index.html">🏠</a>
-        <a href="/poems.html">📚</a>
+        <a href="../index.html">🏠</a>
+        <a href="../poems.html">📚</a>
         <a rel="noopener noreferrer" title="View on GitHub" href="https://github.com/cubap/dunbar-poems"
             target="_blank">
             <svg height="16" class="octicon octicon-mark-github" viewBox="0 0 16 16" version="1.1" width="16"
@@ -36,8 +36,8 @@
     </dla-footer>
 
     <div id="globalFeedback" class="card is-center"></div>
-    <script src="/js/deer.js" type="module"></script>
-    <script src="/js/app.js" type="module"></script>
+    <script src="../js/deer.js" type="module"></script>
+    <script src="../js/app.js" type="module"></script>
     <script>
         window.onhashchange = onload = () => {
             const poemid = window.location.hash.substr(1)

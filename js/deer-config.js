@@ -104,6 +104,7 @@ const config = {
         },
         expression: (obj, options = {}) => {
             const html = `<header><h4>${UTILS.getLabel(obj)}</h4></header>
+            <dumbthing id="dumb"></dumbthing>
             <p>Originally published: ${UTILS.getValue(obj.publicationDate) ?? "unknown"}</p>
             <div class="manifestation-url"></div>
             <small>${options.link ? "<a href='" + options.link + obj['@id'] + "'" + "</a>(view details)" : ""}</small>`
