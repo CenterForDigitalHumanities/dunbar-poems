@@ -63,17 +63,13 @@
             event.preventDefault()
             const idOfAnnotationConnectingExpressionAndWork = elem.closest('deer-view').getAttribute('anno-id')
             if (confirm("Really disconnect this expression of "+expLabel+"?\n(Cannot be undone)")) {
-                console.error("Not deleting yet!")
-                /*
                 return fetch("http://tinydev.rerum.io/app/delete", {
                     method: "DELETE",
                     body: idOfAnnotationConnectingExpressionAndWork
                 }).then(obj => {
                     location.href = "./poems.html"
                 })
-                */
             }
-            
         }
 
     </script>
