@@ -59,22 +59,21 @@
             document.getElementById("poemConnections").setAttribute("deer-id", poemid)
         }
 
-        function removeExpressionFromWork(expressionID, idOfAnnotationConnectingExpressionAndWork){
-            //Do we need to delete the expression and the annotation, or just the annotation?
-            console.log("Not doing an expression deletion right now.  Maybe later.")
-            console.log("Not doing an annotation deletion right now.  Maybe later.")
-            /*
+        async function removeExpressionFromWork(expLabel, expId, elem){
             event.preventDefault()
-            if (confirm("Really remove this manuscript?\n(Cannot be undone)")) {
-                let collectorId = document.querySelector('[deer-key="targetCollection"]').getAttribute("deer-source")
-                fetch("http://tinydev.rerum.io/app/delete", {
+            const idOfAnnotationConnectingExpressionAndWork = elem.closest('deer-view').getAttribute('anno-id')
+            if (confirm("Really disconnect this expression of "+expLabel+"?\n(Cannot be undone)")) {
+                console.error("Not deleting yet!")
+                /*
+                return fetch("http://tinydev.rerum.io/app/delete", {
                     method: "DELETE",
-                    body: collectorId
+                    body: idOfAnnotationConnectingExpressionAndWork
                 }).then(obj => {
                     location.href = "./poems.html"
                 })
+                */
             }
-            */
+            
         }
 
         addEventListener('deer-form-rendered', event => {

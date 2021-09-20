@@ -71,7 +71,7 @@ const config = {
         },
         poemExpressionConnections: (obj, options = {}) => {
             const html = `
-            <p>Review he connected published versions of this poem, listed below.  The same poem can appear in many forms of publication.</p>`
+            <p>Review the connected published versions of this poem, listed below.  The same poem can appear in many forms of publication.</p>`
 
             const then = async (elem, obj, options) => {
                 const workId = obj['@id']
@@ -110,9 +110,9 @@ const config = {
             <div class="row manifestation-url"></div>
             <h6> Control this Expression </h6>
             <div class="row">
-                <a class="tag is-small" href="poem-expression.html#">view details</a>
+                <a class="tag is-small" href="poem-expression.html#">full view</a>
                 <a class="tag is-small" style="color:darkgrey" href="expression.html#">edit details</a>
-                <a class="tag is-small" style="color:red" onclick="removeExpressionFromWork('${UTILS.getValue(obj["@id"])}', this.closest('deer-view').getAttribute('anno-id'))">disconnect from poem</a>
+                <a class="tag is-small" style="color:red" onclick="removeExpressionFromWork('${UTILS.getLabel(obj)}', '${UTILS.getValue(obj["@id"])}', this)">disconnect from poem</a>
             </div>
             `
             const then = async (elem, obj, options) => {
@@ -136,6 +136,7 @@ const config = {
                     .then(ids => ids.map(id => id.selector ? `${id?.source}#${id.selector.value}` : id))
                 const mURL = manId => `<a href="${manId}" target="_blank">${manId}</a>`
                 elem.querySelector(".manifestation-url").innerHTML = manifestationIds.map(manId => mURL(manId)).join('')
+                UTILS.broadcast(undefined, config.EVENTS.NEW_VIEW, elem, {set:[]})
             }
             return { html, then }
         }
