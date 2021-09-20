@@ -110,8 +110,8 @@ const config = {
             <div class="row manifestation-url"></div>
             <h6> Control this Expression </h6>
             <div class="row">
-                <a class="tag is-small" href="poem-expression.html#">full view</a>
-                <a class="tag is-small" style="color:darkgrey" href="expression.html#">edit details</a>
+                <a class="tag is-small" style="color:darkgrey" href="poem-expression.html#${UTILS.getValue(obj["@id"])}">full view</a>
+                <a class="tag is-small" href="expression.html#${UTILS.getValue(obj["@id"])}">edit details</a>
                 <a class="tag is-small" style="color:red" onclick="removeExpressionFromWork('${UTILS.getLabel(obj)}', '${UTILS.getValue(obj["@id"])}', this)">disconnect from poem</a>
             </div>
             `
