@@ -1,4 +1,6 @@
-export default {
+import { default as UTILS } from './deer-utils.js'
+
+const config = {
     ID: "deer-id", // attribute, URI for resource to render
     TYPE: "deer-type", // attribute, JSON-LD @type
     TEMPLATE: "deer-template", // attribute, enum for custom template
@@ -66,7 +68,82 @@ export default {
                 tmpl += `</ul>`
             }
             return tmpl
+        },
+        poemExpressionConnections: (obj, options = {}) => {
+            const html = `
+            <p>Review the connected published versions of this poem, listed below.  The same poem can appear in many forms of publication.</p>`
+
+            const then = async (elem, obj, options) => {
+                const workId = obj['@id']
+                const historyWildcard = { "$exists": true, "$size": 0 }
+                const exprQuery = {
+                    $or: [{
+                        "body.isRealizationOf": workId
+                    }, {
+                        "body.isRealizationOf.value": workId
+                    }],
+                    "__rerum.history.next": historyWildcard
+                }
+                const expressionConnections = await fetch(config.URLS.QUERY, {
+                    method: "POST",
+                    mode: "cors",
+                    body: JSON.stringify(exprQuery)
+                })
+                .then(response => response.json())
+                .then(annos => {
+                    return annos.map(anno => {
+                        return {"annoId":UTILS.getValue(anno["@id"]), "expId":UTILS.getValue(anno.target)}
+                    })
+                })
+                const expressionCard = c => `<deer-view class="card col" deer-template="simpleExpression" deer-link="poem-expression.html#" anno-id="${c.annoId}" deer-id="${c.expId}">${c.expId}</deer-view>`
+                const cards = document.createElement('div')
+                cards.classList.add("row")
+                cards.innerHTML = expressionConnections.map(conn => expressionCard(conn)).join('')
+                elem.append(cards)
+                UTILS.broadcast(undefined, config.EVENTS.NEW_VIEW, elem, { set: cards.children })
+            }
+            return { html, then }
+        },
+        simpleExpression: (obj, options = {}) => {
+            const html = `<header><h4>${UTILS.getLabel(obj)}</h4></header>
+            <h6>View links below for connected content</h6>
+            <div class="row manifestation-url"></div>
+            <h6> Control this Expression </h6>
+            <div class="row">
+                <a class="tag is-small" style="color:darkgrey" href="poem-expression.html#${UTILS.getValue(obj["@id"])}">full view</a>
+                <a class="tag is-small" href="expression.html#${UTILS.getValue(obj["@id"])}">edit details</a>
+            </div>
+            `
+            // ^^ If we want to offer a delete button, here's an OK one
+            //<a class="tag is-small" style="color:red" onclick="removeExpressionFromWork('${UTILS.getLabel(obj)}', '${UTILS.getValue(obj["@id"])}', this)">disconnect from poem</a>
+            
+            const then = async (elem, obj, options) => {
+                const expId = obj['@id']
+                const historyWildcard = { "$exists": true, "$size": 0 }
+                const manQuery = {
+                    $or: [{
+                        "body.isEmbodimentOf": expId
+                    }, {
+                        "body.isEmbodimentOf.value": expId
+                    }],
+                    "__rerum.history.next": historyWildcard
+                }
+                const manifestationIds = await fetch(config.URLS.QUERY, {
+                    method: "POST",
+                    mode: "cors",
+                    body: JSON.stringify(manQuery)
+                })
+                    .then(response => response.json())
+                    .then(annos => annos.map(anno => UTILS.getValue(anno.target)))
+                    .then(ids => ids.map(id => id.selector ? `${id?.source}#${id.selector.value}` : id))
+                const mURL = manId => `<a href="${manId}" target="_blank">${manId}</a>`
+                elem.querySelector(".manifestation-url").innerHTML = manifestationIds.map(manId => mURL(manId)).join('')
+                UTILS.broadcast(undefined, config.EVENTS.NEW_VIEW, elem, {set:[]})
+            }
+            return { html, then }
         }
     },
     version: "alpha"
 }
+
+export default config
