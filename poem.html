@@ -15,26 +15,25 @@
             <a href="./poems.html">📚 View Poems</a>
         </div>
     </dla-header>
+
     <form id="poem" deer-type="Work" deer-context="http://purl.org/vocab/frbr/core#">
         <input type="hidden" deer-key="targetCollection" deer-context="http://schema.org" value="DLA Poems Collection">
         <input type="hidden" deer-key="additionalType" deer-context="http://schema.org" value="http://purl.org/dc/dcmitype/Text">
+        <!-- Maybe we can generate a person entity for him and this could be a URI to an Agent -->
+        <input type="hidden" deer-key-TODO="author" value="Paul Laurence Dunbar"/>
         <div class="row">
-            <label class="col-3 col-2-md text-right">Label:</label>
+            <label class="col-3 col-2-md text-right">Name of Poem:</label>
             <input type="text" deer-key="name" placeholder="Convenient Label for Humans" deer-context="http://schema.org" class="col-9 col-10-md">
-            <label class="col-3 col-2-md text-right">Title:</label>
-            <input type="text" deer-key="title" placeholder="Published Title" deer-context="http://purl.org/dc/dcmitype/" class="col-9 col-10-md">
-            <label class="col-3 col-2-md text-right">URL:</label>
-            <input type="text" deer-key="url" placeholder="Record View" deer-context="http://schema.org" class="col-9 col-4-md">
-            <label class="col-3 col-2-md text-right">notes:</label>
+
+            <label class="col-3 col-2-md text-right">Notes:</label>
             <input type="text" deer-key="notes" placeholder="notes" class="col-9 col-4-md">
+
+            <!-- This should show expression cards with links out to add/edit expressions -->
+            <deer-view id="poemConnections" deer-template="poemExpressionConnections"> </deer-view>
         </div>
         <input type="submit" value="update" class="col">
         <a href="./poems.html" onclick="deleteThis(event)" class="text-error">Drop from collection</a>
     </form>
-
-    <p class="col">Original catalog record: <deer-view id="catalogLink" deer-template="linky" deer-key="url"></deer-view></p>
-    
-    <deer-view id="poemText">incoming text from selector template</deer-view>
     
     <dla-footer class="row">
         <a href="./index.html">🏠</a>
@@ -56,23 +55,23 @@
     <script>
         window.onhashchange = onload = () => {
             const poemid = window.location.hash.substr(1)
-                ;[catalogLink, poem].forEach(el => el.setAttribute("deer-id", poemid))
+            document.getElementById("poem").setAttribute("deer-id", poemid)
+            document.getElementById("poemConnections").setAttribute("deer-id", poemid)
         }
 
-        baseProject.addEventListener('input', e => document.querySelector("a[deer-key='tpen:project']").setAttribute("href", "http://t-pen.org/TPEN/project.jsp?projectID=" + e.target.value))
-
-        function deleteThis(event) {
+        async function removeExpressionFromWork(expLabel, expId, elem){
             event.preventDefault()
-            if (confirm("Really remove this manuscript?\n(Cannot be undone)")) {
-                let collectorId = document.querySelector('[deer-key="targetCollection"]').getAttribute("deer-source")
-                fetch("http://tinydev.rerum.io/app/delete", {
+            const idOfAnnotationConnectingExpressionAndWork = elem.closest('deer-view').getAttribute('anno-id')
+            if (confirm("Really disconnect this expression of "+expLabel+"?\n(Cannot be undone)")) {
+                return fetch("http://tinydev.rerum.io/app/delete", {
                     method: "DELETE",
-                    body: collectorId
+                    body: idOfAnnotationConnectingExpressionAndWork
                 }).then(obj => {
                     location.href = "./poems.html"
                 })
             }
         }
+
     </script>
 </body>
 
