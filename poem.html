@@ -76,46 +76,6 @@
             
         }
 
-        addEventListener('deer-form-rendered', event => {
-            let whatRecordForm = event.target.id
-            let poemData = event.detail
-            switch(whatRecordForm){
-                case "poem":
-                    //gatherConnectedData(poemData)  
-                default:
-            }
-        })
-
-        async function gatherConnectedData(expandedWorkObject){
-            const workId = expandedWorkObject['@id']
-            const historyWildcard = { "$exists": true, "$size": 0 }
-            
-            const exprQuery = {
-                $or: [{
-                    "body.isRealizationOf": workId
-                }, {
-                    "body.isRealizationOf.value": workId
-                }],
-                "__rerum.history.next": historyWildcard
-            }
-
-            const expressionConnections = await fetch("http://tinydev.rerum.io/app/query", {
-                method: "POST",
-                mode: "cors",
-                body: JSON.stringify(exprQuery)
-            })
-            .then(response => response.json())
-            .then(annos => {
-                return annos.map(anno => {
-                    return {"annoId":anno?.["@id"], "expId":anno?.target}
-                })
-            })
-            const expressionCard = con => `<deer-view class="card col" deer-template="expression" deer-link="poem-expression.html#" deer-id="${con.expId}" anno-id="${con.annoId}">${con.expId}</deer-view>`
-            poemConnections.innerHTML = expressionConnections.map(connection => expressionCard(connection)).join('')
-            //Now we would have to broadcast the new view to resolve these ids.  How??
-        }
-        
-
     </script>
 </body>
 
