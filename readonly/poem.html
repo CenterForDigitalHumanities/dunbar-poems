@@ -44,19 +44,6 @@
             const poemid = window.location.hash.substr(1)
                 ;[poem].forEach(el => el.setAttribute("deer-id", poemid))
         }
-
-        function deleteThis(event) {
-            event.preventDefault()
-            if (confirm("Really remove this Poem?\n(Cannot be undone)")) {
-                let collectorId = document.querySelector('[deer-key="targetCollection"]').getAttribute("deer-source")
-                fetch("http://tinydev.rerum.io/app/delete", {
-                    method: "DELETE",
-                    body: collectorId
-                }).then(obj => {
-                    location.href = "./poems.html"
-                })
-            }
-        }
     </script>
 </body>
 
