@@ -112,9 +112,11 @@ const config = {
             <div class="row">
                 <a class="tag is-small" style="color:darkgrey" href="poem-expression.html#${UTILS.getValue(obj["@id"])}">full view</a>
                 <a class="tag is-small" href="expression.html#${UTILS.getValue(obj["@id"])}">edit details</a>
-                <a class="tag is-small" style="color:red" onclick="removeExpressionFromWork('${UTILS.getLabel(obj)}', '${UTILS.getValue(obj["@id"])}', this)">disconnect from poem</a>
             </div>
             `
+            // ^^ If we want to offer a delete button, here's an OK one
+            //<a class="tag is-small" style="color:red" onclick="removeExpressionFromWork('${UTILS.getLabel(obj)}', '${UTILS.getValue(obj["@id"])}', this)">disconnect from poem</a>
+            
             const then = async (elem, obj, options) => {
                 const expId = obj['@id']
                 const historyWildcard = { "$exists": true, "$size": 0 }
