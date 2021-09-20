@@ -3,25 +3,21 @@
 
 <head>
     <title>Dunbar Poems</title>
-    <link rel="stylesheet" href="css/poems.css">
+    <link rel="stylesheet" href="../css/poems.css">
     <link href="favicon.ico" rel="icon" type="image/x-icon" />
+    <script src="https://www.saxonica.com/saxon-js/documentation/SaxonJS/SaxonJS2.rt.js" defer></script>
 </head>
 
 <body class="container">
     <dla-header>
-        <img src="media/logo.jpg" alt="logo">
+        <img src="../media/logo.jpg" alt="logo">
     </dla-header>
-    <form id="poemForm" deer-type="Work" deer-context="http://purl.org/vocab/frbr/core#" class="row">
-        <input type="text" deer-key="name" deer-context="http://schema.org" placeholder="Display Label" class="col">
-        <input type="hidden" deer-key="targetCollection" deer-context="http://schema.org" value="DLA Poems Collection">
-        <input type="hidden" deer-key="additionalType" deer-context="http://schema.org" value="http://purl.org/dc/dcmitype/Text">
-        <input type="submit" value="Add Poem to Collection" class="col">
-    </form>
+    <input type="text" id="filterTerm" placeholder="Type to filter">
     <deer-view id="collectionList" deer-collection="DLA Poems Collection" deer-link="poem.html#" deer-template="poemsList">
         Loading&hellip;
     </deer-view>
     <dla-footer>
-        <a href="./index.html">🏠</a>
+        <a href="../index.html">🏠</a>
         <a href="./poems.html">📚</a>
         <a rel="noopener noreferrer" title="View on GitHub"
             href="https://github.com/cubap/dunbar-poems" target="_blank">
@@ -34,14 +30,29 @@
         </a>
     </dla-footer>
     <div id="globalFeedback" class="card is-center"></div>
-    <script src="js/deer.js" type="module"></script>
-    <script src="js/app.js" type="module"></script>
+    <script src="../js/deer.js" type="module"></script>
+    <script src="../js/app.js" type="module"></script>
     <script>
-        document.addEventListener('deer-created', event => {
-            let e = new CustomEvent("deer-view", { detail: { set: [collectionList] }, bubbles: true })
-            document.dispatchEvent(e)
-            setTimeout(() => location.href = "", 3000)
+        filterTerm.addEventListener('input',ev=>{
+            const term = ev.target.value
+            // let timeout
+            // return () => {
+            //     const later = () => {
+            //         clearTimeout(timeout)
+                    filterTitles(term)
+            //     }
+            //     clearTimeout(timeout)
+            //     timeout = setTimeout(later,500)
+            // }
         })
+        function filterTitles(term) {
+            document.querySelectorAll('li.hidden').forEach(el=>el.classList.remove('hidden'))
+            const filterMatches = SaxonJS.XPath.evaluate(`//li//text()[not(contains(lower-case(.), '${term}'))]`, document,{
+                xpathDefaultNamespace:"http://www.w3.org/1999/xhtml",
+                resultForm:"array"
+            })
+            filterMatches?.forEach(el=>el.parentElement.closest("li")?.classList.add('hidden'))
+        }
     </script>
 </body>
 

@@ -4,6 +4,10 @@
   white-space: nowrap;
 }
 
+.hidden {
+  display: none;
+}
+
 textarea {
   resize    : vertical;
   max-height: 20rem;
@@ -66,97 +70,6 @@ a[data-change] {
 
 .info {
   background-color: #97cff3;
-}
-
-.um {
-  background-color: #aaf397 !important;
-}
-
-.lm {
-  background-color: #97cff3 !important;
-}
-
-.ulm {
-  background-color: #97f3ee !important;
-}
-
-.llm {
-  background-color: #97a8f3 !important;
-}
-
-.urm {
-  background-color: #f3b997 !important;
-}
-
-.lrm {
-  background-color: #f3ea97 !important;
-}
-
-.ti {
-  background-color: #f397d4 !important;
-}
-
-.li {
-  background-color: #f39797 !important;
-}
-
-line.um,
-line.lm,
-line.ulm,
-line.llm,
-line.urm,
-line.lrm,
-line.ti,
-line.li {
-text-overflow: ellipsis;
-white-space: nowrap;
-width: 100%;
-overflow: hidden;
-}
-line.um+line.um,
-line.lm+line.lm,
-line.ulm+line.ulm,
-line.llm+line.llm,
-line.urm+line.urm,
-line.lrm+line.lrm,
-line.ti+line.ti,
-line.li+line.li {
-  display: none;
-}
-
-line {
-  display    : block;
-  user-select: none;
-  transition : background-color .2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-line:nth-child(2n) {
-  background-color: #dddddd;
-}
-
-line.selected {
-  background-color: #ff8;
-}
-
-line:nth-child(2n).selected {
-  background-color: #dd8;
-}
-
-line.just {
-  background-color: #999;
-}
-
-line.selected.just {
-  background-color: #cc0;
-}
-
-#zoomy {
-  position        : fixed;
-  right           : 0;
-  top             : 0;
-  height          : 100vh;
-  background-color: rgba(255, 255, 255, .4);
-  width           : 50vw;
 }
 
 /* Feedback */
@@ -225,4 +138,17 @@ line.selected.just {
     bottom : 0;
     opacity: 0;
   }
+}
+
+/* TEI pseudoXSLT */
+#textSample {
+  font-variant: small-caps;
+  font-weight: bold;
+}
+#textSample lg[type='stanza'],#textSample l {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-variant: initial;
+  font-weight: initial;
+  display: block;
+  width: 100%;
 }
