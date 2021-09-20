@@ -12,12 +12,6 @@
     <dla-header>
         <img src="../media/logo.jpg" alt="logo">
     </dla-header>
-    <form id="poemForm" deer-type="Work" deer-context="http://purl.org/vocab/frbr/core#" class="row">
-        <input type="text" deer-key="name" deer-context="http://schema.org" placeholder="Display Label" class="col">
-        <input type="hidden" deer-key="targetCollection" deer-context="http://schema.org" value="DLA Poems Collection">
-        <input type="hidden" deer-key="additionalType" deer-context="http://schema.org" value="http://purl.org/dc/dcmitype/Text">
-        <input type="submit" value="Add Poem to Collection" class="col">
-    </form>
     <input type="text" id="filterTerm" placeholder="Type to filter">
     <deer-view id="collectionList" deer-collection="DLA Poems Collection" deer-link="poem.html#" deer-template="poemsList">
         Loading&hellip;
@@ -39,11 +33,6 @@
     <script src="../js/deer.js" type="module"></script>
     <script src="../js/app.js" type="module"></script>
     <script>
-        document.addEventListener('deer-created', event => {
-            let e = new CustomEvent("deer-view", { detail: { set: [collectionList] }, bubbles: true })
-            document.dispatchEvent(e)
-            setTimeout(() => location.href = "", 3000)
-        })
         filterTerm.addEventListener('input',ev=>{
             const term = ev.target.value
             // let timeout
