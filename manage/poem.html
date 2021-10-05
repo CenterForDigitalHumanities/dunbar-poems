@@ -4,23 +4,29 @@
 <head>
     <title>Dunbar Poems</title>
     <link rel="stylesheet" href="../css/poems.css">
-    <link href="favicon.ico" rel="icon" type="image/x-icon" />
+    <link href="../favicon.ico" rel="icon" type="image/x-icon" />
     <script src="https://www.saxonica.com/saxon-js/documentation/SaxonJS/SaxonJS2.rt.js" defer></script>
 </head>
 
 <body class="container">
     <dla-header>
         <img src="../media/logo.jpg" alt="logo">
+        <div class="tabs">
+            <a href="../index.html">🏠</a>
+            <a href="./poems.html">📚 View Poems</a>
+        </div>
     </dla-header>
-    <input type="text" id="filterTerm" placeholder="Type to filter">
-    <deer-view id="collectionList" deer-collection="DLA Poems Collection" deer-listing="http://store.rerum.io/v1/id/615b724650c86821e60b11fa" deer-link="poem.html#" deer-template="poemsList">
-        Loading&hellip;
+    <deer-view id="poem" deer-template="poemDetail">
+        Without a <code>deer-key</code>, I do not know what to load here.
     </deer-view>
-    <dla-footer>
+
+    <deer-view id="poemText">incoming text from selector template</deer-view>
+    
+    <dla-footer class="row">
         <a href="../index.html">🏠</a>
         <a href="./poems.html">📚</a>
-        <a rel="noopener noreferrer" title="View on GitHub"
-            href="https://github.com/cubap/dunbar-poems" target="_blank">
+        <a rel="noopener noreferrer" title="View on GitHub" href="https://github.com/cubap/dunbar-poems"
+            target="_blank">
             <svg height="16" class="octicon octicon-mark-github" viewBox="0 0 16 16" version="1.1" width="16"
                 aria-hidden="true">
                 <path fill-rule="evenodd"
@@ -29,29 +35,14 @@
             </svg>
         </a>
     </dla-footer>
+
     <div id="globalFeedback" class="card is-center"></div>
     <script src="../js/deer.js" type="module"></script>
     <script src="../js/app.js" type="module"></script>
     <script>
-        filterTerm.addEventListener('input',ev=>{
-            const term = ev.target.value
-            // let timeout
-            // return () => {
-            //     const later = () => {
-            //         clearTimeout(timeout)
-                    filterTitles(term)
-            //     }
-            //     clearTimeout(timeout)
-            //     timeout = setTimeout(later,500)
-            // }
-        })
-        function filterTitles(term) {
-            document.querySelectorAll('li.hidden').forEach(el=>el.classList.remove('hidden'))
-            const filterMatches = SaxonJS.XPath.evaluate(`//li//text()[not(contains(lower-case(.), '${term}'))]`, document,{
-                xpathDefaultNamespace:"http://www.w3.org/1999/xhtml",
-                resultForm:"array"
-            })
-            filterMatches?.forEach(el=>el.parentElement.closest("li")?.classList.add('hidden'))
+        window.onhashchange = onload = () => {
+            const poemid = window.location.hash.substr(1)
+                ;[poem].forEach(el => el.setAttribute("deer-id", poemid))
         }
     </script>
 </body>

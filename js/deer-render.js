@@ -214,20 +214,6 @@ DEER.TEMPLATES.list = function (obj, options = {}) {
     }
     return tmpl
 }
-
-DEER.TEMPLATES.poemsList = function (obj, options = {}) {
-    let tmpl = `<h2>${UTILS.getLabel(obj)}</h2>`
-    if (options.list) {
-        tmpl += `<ul>`
-        obj[options.list].forEach((val, index) => {
-            let name = UTILS.getLabel(val, (val.type ?? val['@type'] ?? (index+1)))
-            tmpl += (val["@id"] && options.link) ? `<li ${DEER.ID}="${val["@id"]}"><a href="${options.link}${val["@id"]}"><deer-view ${DEER.ID}="${val["@id"]}" ${DEER.TEMPLATE}="label">${name}</deer-view></a></li>` : `<li ${DEER.ID}="${val["@id"]}"><deer-view ${DEER.ID}="${val["@id"]}" ${DEER.TEMPLATE}="label">${name}</deer-view></li>`
-        })
-        tmpl += `</ul>`
-    }
-    return tmpl
-}
-
 /**
  * The TEMPLATED renderer to draw JSON to the screen
  * @param {Object} obj some json of type Person to be drawn

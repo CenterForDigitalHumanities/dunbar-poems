@@ -58,21 +58,56 @@ const config = {
      */
     TEMPLATES: {
         cat: (obj) => `<h5>${obj.name}</h5><img src="http://placekitten.com/300/150" style="width:100%;">`,
-        poemsList: function (obj, options = {}) {
-            let tmpl = `<h2>Poems</h2>`
+        poemsList: (obj, options = {}) => {
+            let html = `<h2>${options.label ?? UTILS.getLabel(obj,'Poems')}</h2>`
             if (options.list) {
-                tmpl += `<ul>`
+                html += `<ul>`
                 obj[options.list].forEach((val, index) => {
-                    tmpl += `<li><a href="${options.link}${val['@id']}"><deer-view deer-id="${val["@id"]}" deer-template="label"></deer-view></a></li>`
+                    const name = UTILS.getLabel(val, (val.type ?? val['@type'] ?? (index+1)))
+                    html += (val["@id"] && options.link) ? `<li deer-id="${val["@id"]}"><a href="${options.link}${val["@id"]}"><span deer-id="${val["@id"]}">${name}</span></a></li>` : `<li deer-id="${val["@id"]}"><span deer-id="${val["@id"]}">${name}</span></li>`
                 })
-                tmpl += `</ul>`
+                html += `</ul>`
             }
-            return tmpl
+            const then = async (elem) => {
+                const listing = elem.getAttribute("deer-listing")
+                const pendingLists = !listing || fetch(listing).then(res => res.json())
+                    .then(list => {
+                        list[elem.getAttribute("deer-list") ?? "itemListElement"]?.forEach(item => {
+                            const record = elem.querySelector(`span[deer-id='${item?.['@id'] ?? item?.id ?? item}'`)
+                            if (typeof record === 'object' && record.nodeType !== undefined) {
+                                record.innerHTML = item.label
+                                record.closest('li').classList.add("cached")
+                            }
+                        })
+                    })
+                await pendingLists
+                const newView = new Set()
+                elem.querySelectorAll("li:not(.cached) span").forEach((item,index) => {
+                    item.classList.add("deer-view")
+                    item.setAttribute("deer-template","label")
+                    newView.add(item)
+                })
+                UTILS.broadcast(undefined, "deer-view", document, { set: newView })
+            }
+            return { html, then }
         },
         poemDetail: (obj, options = {}) => {
             const html = `<h2>${UTILS.getLabel(obj)}</h2> 
-            <h5>Sample Text</h5>
-            <div id="textSample">[ Text Sample ]</div>
+            <div id="textSample" class="card">
+                [ Text Sample ]
+                <stanza>
+                    <line></line>
+                    <line></line>
+                    <line></line>
+                    <line></line>
+                </stanza>
+                <stanza>
+                    <line></line>
+                    <line></line>
+                    <line></line>
+                    <line></line>
+                </stanza>
+            </div>
             <h4>Around the Globe</h4>
             <p>These are various published versions of this poem.</p>`
             const then = async (elem, obj, options) => {
@@ -283,6 +318,130 @@ const config = {
                 UTILS.broadcast(undefined, config.EVENTS.NEW_VIEW, elem, { set: [] })
             }
             return { html, then }
+        },
+        managedlist: (obj, options = {}) => {
+            try {
+                let tmpl = `<input type="hidden" deer-collection="${options.collection}">`
+                if (options.list) {
+                    tmpl += `<ul>`
+                    obj[options.list].forEach((val, index) => {
+                        const removeBtn = `<a href="${val['@id']}" class="removeCollectionItem" title="Delete This Entry">&#x274C</a>`
+                        const visibilityBtn = `<a class="togglePublic" href="${val['@id']}" title="Toggle public visibility"> 👁 </a>`
+                        tmpl += `<li>
+                        ${visibilityBtn}
+                        <a href="${options.link}${val['@id']}">
+                            <deer-view deer-id="${val["@id"]}" deer-template="label">${index + 1}</deer-view>
+                        </a>
+                        ${removeBtn}
+                        </li>`
+                    })
+                    tmpl += `</ul>`
+                }
+                else {
+                    console.log("There are no items in this list to draw.")
+                    console.log(obj)
+                }
+                return {
+                    html: tmpl,
+                    then: elem => {
+        
+                        fetch(elem.getAttribute("deer-listing")).then(r => r.json())
+                            .then(list => {
+                                elem.listCache = new Set()
+                                list.itemListElement?.forEach(item => elem.listCache.add(item['@id']))
+                                for (const a of document.querySelectorAll('.togglePublic')) {
+                                    const include = elem.listCache.has(a.getAttribute("href")) ? "add" : "remove"
+                                    a.classList[include]("is-included")
+                                }
+                            })
+                            .then(() => {
+                                document.querySelectorAll(".removeCollectionItem").forEach(el => el.addEventListener('click', (ev) => {
+                                    ev.preventDefault()
+                                    ev.stopPropagation()
+                                    const itemID = el.getAttribute("href")
+                                    const fromCollection = document.querySelector('input[deer-collection]').getAttribute("deer-collection")
+                                    deleteThis(itemID, fromCollection)
+                                }))
+                                document.querySelectorAll('.togglePublic').forEach(a => a.addEventListener('click', ev => {
+                                    ev.preventDefault()
+                                    ev.stopPropagation()
+                                    const uri = a.getAttribute("href")
+                                    const included = elem.listCache.has(uri)
+                                    a.classList[included ? "remove" : "add"]("is-included")
+                                    elem.listCache[included ? "delete" : "add"](uri)
+                                    saveList.style.visibility = "visible"
+                                }))
+                                saveList.addEventListener('click', overwriteList)
+                            })
+        
+        
+                        function overwriteList() {
+                            let mss = []
+                            elem.listCache.forEach(uri => {
+                                mss.push({
+                                    label: document.querySelector(`deer-view[deer-id='${uri}']`).textContent.trim(),
+                                    '@id': uri
+                                })
+                            })
+        
+                            const list = {
+                                '@id': elem.getAttribute("deer-listing"),
+                                '@context': 'https://schema.org/',
+                                '@type': "ItemList",
+                                name: elem.getAttribute("deer-collection") ?? "Dunbar Poems",
+                                numberOfItems: elem.listCache.size,
+                                itemListElement: mss
+                            }
+        
+                            fetch("http://tinydev.rerum.io/app/overwrite", {
+                                method: "PUT",
+                                mode: 'cors',
+                                body: JSON.stringify(list)
+                            }).then(r => r.ok ? r.json() : Promise.reject(Error(r.text)))
+                                .catch(err => alert(`Failed to save: ${err}`))
+                        }
+        
+                        function deleteThis(id, collection) {
+                            if (confirm("Really remove this record?\n(Cannot be undone)")) {
+                                const historyWildcard = { "$exists": true, "$eq": [] }
+                                const queryObj = {
+                                    $or: [{
+                                        "targetCollection": collection
+                                    }, {
+                                        "body.targetCollection": collection
+                                    }],
+                                    target: id,
+                                    "__rerum.history.next": historyWildcard
+                                }
+                                fetch("http://tinydev.rerum.io/app/query", {
+                                    method: "POST",
+                                    body: JSON.stringify(queryObj)
+                                })
+                                    .then(r => r.ok ? r.json() : Promise.reject(new Error(r?.text)))
+                                    .then(annos => {
+                                        let all = annos.map(anno => {
+                                            return fetch("http://tinydev.rerum.io/app/delete", {
+                                                method: "DELETE",
+                                                body: anno["@id"]
+                                            })
+                                                .then(r => r.ok ? r.json() : Promise.reject(Error(r.text)))
+                                                .catch(err => { throw err })
+                                        })
+                                        Promise.all(all).then(success => {
+                                            document.querySelector(`[deer-id="${id}"]`).closest("li").remove()
+                                        })
+                                    })
+                                    .catch(err => console.error(`Failed to delete: ${err}`))
+                            }
+                        }
+        
+                    }
+                }
+            } catch (err) {
+                console.log("Could not build list template.")
+                console.error(err)
+                return null
+            }
         }
     },
     version: "alpha"

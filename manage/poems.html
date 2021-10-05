@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Dunbar Poems</title>
+    <title>Manage Dunbar Poems</title>
     <link rel="stylesheet" href="../css/poems.css">
     <link href="favicon.ico" rel="icon" type="image/x-icon" />
     <script src="https://www.saxonica.com/saxon-js/documentation/SaxonJS/SaxonJS2.rt.js" defer></script>
@@ -13,7 +13,10 @@
         <img src="../media/logo.jpg" alt="logo">
     </dla-header>
     <input type="text" id="filterTerm" placeholder="Type to filter">
-    <deer-view id="collectionList" deer-collection="DLA Poems Collection" deer-listing="http://store.rerum.io/v1/id/615b724650c86821e60b11fa" deer-link="poem.html#" deer-template="poemsList">
+    <button id="checkAll" class="button" role="button">Check All</button>
+    <button id="checkInvert" class="button" role="button">Invert Selection</button>
+    <button id="saveList" style="visibility: hidden;" class="button primary" role="button">Save List</button>
+    <deer-view id="collectionList" title="Managing Poems" deer-collection="DLA Poems Collection" deer-listing="http://store.rerum.io/v1/id/615b724650c86821e60b11fa" deer-link="poem.html#" deer-template="managedlist">
         Loading&hellip;
     </deer-view>
     <dla-footer>
@@ -53,6 +56,10 @@
             })
             filterMatches?.forEach(el=>el.parentElement.closest("li")?.classList.add('hidden'))
         }
+
+        checkAll.addEventListener('click', ev => document.querySelectorAll('.togglePublic').forEach(a => a.classList.contains("is-included") || a.click()))
+        checkInvert.addEventListener('click', ev => document.querySelectorAll('.togglePublic').forEach(a => a.click()))
+
     </script>
 </body>
 
