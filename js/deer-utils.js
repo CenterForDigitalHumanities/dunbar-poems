@@ -275,7 +275,14 @@ export default {
      * @param [String] targetStyle other formats of resource targeting.  May be null
      */
     findByTargetId: async function (id, targetStyle = []) {
-        let everything = Object.keys(localStorage).map(k => JSON.parse(localStorage.getItem(k)))
+        const everything = Object.keys(localStorage).map(k => {
+            try {
+                return JSON.parse(localStorage.getItem(k))
+            } catch (err) {
+                // probably JSON booch or other item type. 
+                // localStorage.removeItem(k)
+            }
+        })
         if (!Array.isArray(targetStyle)) {
             targetStyle = [targetStyle]
         }
@@ -300,7 +307,7 @@ export default {
         })
             .then(response => response.json())
             .catch((err) => console.error(err))
-        let local_matches = everything.filter(o => o.target === id)
+        let local_matches = everything.filter(o => o?.target === id)
         matches = local_matches.concat(matches)
         return matches
     },

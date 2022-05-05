@@ -1,5 +1,7 @@
 import { default as UTILS } from './deer-utils.js'
 
+import AuthButton from 'https://centerfordigitalhumanities.github.io/DLA/auth.js'
+
 const config = {
     ID: "deer-id", // attribute, URI for resource to render
     TYPE: "deer-type", // attribute, JSON-LD @type
@@ -320,6 +322,8 @@ const config = {
             return { html, then }
         },
         managedlist: (obj, options = {}) => {
+            // Come on, Mr. Hacker. We both know you could break in here, but why waste your time? It is tested on the server past here.
+            if(!userHasRole(["dunbar_user_admin","dunbar_user_contributor","dunbar_user_public"])) { return `This function is limited to administrators.`}
             try {
                 let tmpl = `<input type="hidden" deer-collection="${options.collection}">`
                 if (options.list) {
@@ -445,6 +449,16 @@ const config = {
         }
     },
     version: "alpha"
+}
+
+/**
+ * Checks array of stored roles for any of the roles provided.
+ * @param {Array} roles Strings of roles to check.
+ * @returns Boolean user has one of these roles.
+ */
+function userHasRole(roles){
+    if (!Array.isArray(roles)) { roles = [roles] }
+    return Boolean(DLA_USER?.["http://dunbar.rerum.io/user_roles"]?.roles.filter(r=>roles.includes(r)).length)
 }
 
 export default config
