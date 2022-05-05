@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="../css/poems.css">
     <link href="../favicon.ico" rel="icon" type="image/x-icon" />
     <script src="https://www.saxonica.com/saxon-js/documentation/SaxonJS/SaxonJS2.rt.js" defer></script>
+    <script src="../../js/deer.js" type="module"></script>
+    <script src="../../js/app.js" type="module"></script>
 </head>
 
 <body class="container">
@@ -20,9 +22,7 @@
     <deer-view id="poem" deer-template="poemDetail">
         Without a <code>deer-key</code>, I do not know what to load here.
     </deer-view>
-
     <deer-view id="poemText">incoming text from selector template</deer-view>
-    
     <dla-footer class="row">
         <a href="../index.html">🏠</a>
         <a href="./poems.html">📚</a>
@@ -36,10 +36,7 @@
             </svg>
         </a>
     </dla-footer>
-
     <div id="globalFeedback" class="card is-center"></div>
-    <script src="../js/deer.js" type="module"></script>
-    <script src="../js/app.js" type="module"></script>
     <script>
         window.onhashchange = onload = () => {
             const poemid = window.location.hash.substr(1)
