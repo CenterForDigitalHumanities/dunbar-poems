@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="../css/poems.css">
     <link href="../favicon.ico" rel="icon" type="image/x-icon" />
     <script src="https://www.saxonica.com/saxon-js/documentation/SaxonJS/SaxonJS2.rt.js" defer></script>
+    <script src="../js/deer.js" type="module"></script>
+    <script src="../js/app.js" type="module"></script>
 </head>
 
 <body class="container">
@@ -14,6 +16,7 @@
         <div class="tabs">
             <a href="../index.html">🏠</a>
             <a href="./poems.html">📚 View Poems</a>
+            <button is="auth-button" disabled>Welcome</button>
         </div>
     </dla-header>
     <deer-view id="poem" deer-template="poemDetail">
@@ -37,8 +40,7 @@
     </dla-footer>
 
     <div id="globalFeedback" class="card is-center"></div>
-    <script src="../js/deer.js" type="module"></script>
-    <script src="../js/app.js" type="module"></script>
+
     <script>
         window.onhashchange = onload = () => {
             const poemid = window.location.hash.substr(1)
