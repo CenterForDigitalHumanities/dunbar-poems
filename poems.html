@@ -5,11 +5,18 @@
     <title>Dunbar Poems</title>
     <link rel="stylesheet" href="css/poems.css">
     <link href="favicon.ico" rel="icon" type="image/x-icon" />
+    <script src="https://www.saxonica.com/saxon-js/documentation/SaxonJS/SaxonJS2.rt.js" defer></script>
+    <script src="./js/deer.js" type="module"></script>
+    <script src="./js/app.js" type="module"></script>
 </head>
 
 <body class="container">
     <dla-header>
         <img src="media/logo.jpg" alt="logo">
+        <div class="tabs">
+            <a href="./index.html">🏠</a>
+            <button is="auth-button" disabled>Welcome</button>
+        </div>
     </dla-header>
     <form id="poemForm" deer-type="Work" deer-context="http://purl.org/vocab/frbr/core#" class="row">
         <input type="text" deer-key="name" deer-context="http://schema.org" placeholder="Display Label" class="col">
@@ -34,8 +41,6 @@
         </a>
     </dla-footer>
     <div id="globalFeedback" class="card is-center"></div>
-    <script src="js/deer.js" type="module"></script>
-    <script src="js/app.js" type="module"></script>
     <script>
         document.addEventListener('deer-created', event => {
             let e = new CustomEvent("deer-view", { detail: { set: [collectionList] }, bubbles: true })

@@ -5,14 +5,17 @@
     <title>Dunbar Poems</title>
     <link rel="stylesheet" href="/css/poems.css">
     <link href="/favicon.ico" rel="icon" type="image/x-icon" />
+    <script src="../js/deer.js" type="module"></script>
+    <script src="../js/app.js" type="module"></script>
 </head>
 
 <body class="container">
     <dla-header>
-        <img src="/media/logo.jpg" alt="logo">
+        <img src="../media/logo.jpg" alt="logo">
         <div class="tabs">
-            <a href="/index.html">🏠</a>
-            <a href="/poems.html">📚 View Poems</a>
+            <a href="../index.html">🏠</a>
+            <a href="./poems.html">📚 View Poems</a>
+            <button is="auth-button">login</button>
         </div>
     </dla-header>
     <deer-view id="poem" deer-template="expressionDetail">
@@ -34,10 +37,7 @@
             </svg>
         </a>
     </dla-footer>
-
     <div id="globalFeedback" class="card is-center"></div>
-    <script src="/js/deer.js" type="module"></script>
-    <script src="/js/app.js" type="module"></script>
     <script>
         window.onhashchange = onload = () => {
             const poemid = window.location.hash.substr(1)

@@ -6,11 +6,17 @@
     <link rel="stylesheet" href="../css/poems.css">
     <link href="favicon.ico" rel="icon" type="image/x-icon" />
     <script src="https://www.saxonica.com/saxon-js/documentation/SaxonJS/SaxonJS2.rt.js" defer></script>
+    <script src="../js/deer.js" type="module"></script>
+    <script src="../js/app.js" type="module"></script>
 </head>
 
 <body class="container">
     <dla-header>
         <img src="../media/logo.jpg" alt="logo">
+        <div class="tabs">
+            <a href="../index.html">🏠</a>
+            <button is="auth-button" disabled>Welcome</button>
+        </div>
     </dla-header>
     <input type="text" id="filterTerm" placeholder="Type to filter">
     <deer-view id="collectionList" deer-collection="DLA Poems Collection" deer-listing="http://store.rerum.io/v1/id/615b724650c86821e60b11fa" deer-link="poem.html#" deer-template="poemsList">
@@ -30,8 +36,6 @@
         </a>
     </dla-footer>
     <div id="globalFeedback" class="card is-center"></div>
-    <script src="../js/deer.js" type="module"></script>
-    <script src="../js/app.js" type="module"></script>
     <script>
         filterTerm.addEventListener('input',ev=>{
             const term = ev.target.value

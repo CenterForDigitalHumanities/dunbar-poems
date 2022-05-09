@@ -6,11 +6,17 @@
     <link rel="stylesheet" href="../css/poems.css">
     <link href="favicon.ico" rel="icon" type="image/x-icon" />
     <script src="https://www.saxonica.com/saxon-js/documentation/SaxonJS/SaxonJS2.rt.js" defer></script>
+    <script src="../js/deer.js" type="module"></script>
+    <script src="../js/app.js" type="module"></script>
 </head>
 
 <body class="container">
     <dla-header>
         <img src="../media/logo.jpg" alt="logo">
+        <div class="tabs">
+            <a href="../index.html">🏠</a>
+            <button is="auth-button">login</button>
+        </div>
     </dla-header>
     <input type="text" id="filterTerm" placeholder="Type to filter">
     <button id="checkAll" class="button" role="button">Check All</button>
@@ -33,8 +39,6 @@
         </a>
     </dla-footer>
     <div id="globalFeedback" class="card is-center"></div>
-    <script src="../js/deer.js" type="module"></script>
-    <script src="../js/app.js" type="module"></script>
     <script>
         filterTerm.addEventListener('input',ev=>{
             const term = ev.target.value
@@ -59,7 +63,6 @@
 
         checkAll.addEventListener('click', ev => document.querySelectorAll('.togglePublic').forEach(a => a.classList.contains("is-included") || a.click()))
         checkInvert.addEventListener('click', ev => document.querySelectorAll('.togglePublic').forEach(a => a.click()))
-
     </script>
 </body>
 
