@@ -1,6 +1,6 @@
 import { default as UTILS } from './deer-utils.js'
 
-import AuthButton from 'https://centerfordigitalhumanities.github.io/DLA/auth.js'
+import AuthButton from 'https://centerfordigitalhumanities.github.io/Dunbar-Users-CDN/auth.js'
 
 const config = {
     ID: "deer-id", // attribute, URI for resource to render
