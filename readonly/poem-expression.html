@@ -10,14 +10,29 @@
 </head>
 
 <body class="container">
-    <dla-header>
+    <!-- <dla-header>
         <img src="../media/logo.jpg" alt="logo">
         <div class="tabs">
             <a href="../index.html">🏠</a>
             <a href="./poems.html">📚 View Poems</a>
             <button is="auth-button" disabled>Welcome</button>
         </div>
-    </dla-header>
+    </dla-header> -->
+    <gm-header>
+        <auth-button class="container">
+            <button is="auth-button">login</button>    
+        </auth-button>
+        <div class="tabs">
+            <a href="./index.html">🏠</a>
+            <a href="./poems.html">📚 View Poems</a>
+        </div>
+        <paul>
+            <img src="https://cdm16007.contentdm.oclc.org/iiif/2/p267401coll32:4553/100,0,1100,1100/150,150/0/default.jpg">
+        </paul>
+        <logoimg>
+            <img src="media/logo2.jpg" alt="logo">    
+        </logoimg>
+    </gm-header>
     <deer-view id="poem" deer-template="expressionDetail">
         Without a <code>deer-key</code>, I do not know what to load here.
     </deer-view>
