@@ -11,13 +11,21 @@
 </head>
 
 <body class="container">
-    <dla-header>
-        <img src="../media/logo.jpg" alt="logo">
+    <gm-header>
+        <auth-button class="container">
+            <button is="auth-button" disabled>login</button>    
+        </auth-button>
         <div class="tabs">
-            <a href="../index.html">🏠</a>
-            <button is="auth-button" disabled>Welcome</button>
+            <a href="./index.html">🏠 Dunbar Poems Home </a>
+            <a href="./poem.html">📚 Poem View </a>
         </div>
-    </dla-header>
+        <paul>
+            <img src="https://cdm16007.contentdm.oclc.org/iiif/2/p267401coll32:4553/100,0,1100,1100/150,150/0/default.jpg">
+        </paul>
+        <logoimg>
+            <img src="../media/logo2.jpg" alt="logo">    
+        </logoimg>
+    </gm-header>
     <input type="text" id="filterTerm" placeholder="Type to filter">
     <deer-view id="collectionList" deer-collection="DLA Poems Collection" deer-listing="http://store.rerum.io/v1/id/615b724650c86821e60b11fa" deer-link="poem.html#" deer-template="poemsList">
         Loading&hellip;
@@ -35,7 +43,7 @@
                 </svg>
             </a>
             <a target="_blank" href="https://www.slu.edu/research/faculty-resources/research-computing.php">
-                <img class="brand" src="media/rcg-logo.jpg"> <small>©2022 Research Computing Group </small>
+                <img class="brand" src="../media/rcg-logo.jpg"> <small>©2022 Research Computing Group </small>
             </a>
         </gm-footer>
     <div id="globalFeedback" class="card is-center"></div>

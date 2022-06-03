@@ -11,14 +11,21 @@
 </head>
 
 <body class="container">
-    <dla-header>
-        <img src="../media/logo.jpg" alt="logo">
+    <gm-header>
+        <auth-button class="container">
+            <button is="auth-button" disabled>login</button>    
+        </auth-button>
         <div class="tabs">
-            <a href="../index.html">🏠</a>
-            <a href="./poems.html">📚 View Poems</a>
-            <button is="auth-button" disabled>Welcome</button>
+            <a href="./index.html">🏠 Dunbar Poems Home</a>
+            <a href="./poems.html">📚 Dunbar Poems List </a>
         </div>
-    </dla-header>
+        <paul>
+            <img src="https://cdm16007.contentdm.oclc.org/iiif/2/p267401coll32:4553/100,0,1100,1100/150,150/0/default.jpg">
+        </paul>
+        <logoimg>
+            <img src="../media/logo2.jpg" alt="logo">    
+        </logoimg>
+    </gm-header>
     <deer-view id="poem" deer-template="poemDetail">
         Without a <code>deer-key</code>, I do not know what to load here.
     </deer-view>
@@ -38,7 +45,7 @@
             </svg>
         </a>
         <a target="_blank" href="https://www.slu.edu/research/faculty-resources/research-computing.php">
-            <img class="brand" src="media/rcg-logo.jpg"> <small>©2022 Research Computing Group </small>
+            <img class="brand" src="../media/rcg-logo.jpg"> <small>©2022 Research Computing Group </small>
         </a>
     </gm-footer>
 
